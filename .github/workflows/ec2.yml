@@ -30,11 +30,21 @@ on:
         description: "Name Tag for EC2"
         required: true
         type: string
+      terraform_action:
+        description: "Terraform action to perform (apply/destroy)"
+        required: true
+        default: "apply"
+        type: choice
+        options:
+          - apply
+          - destroy
 
 jobs:
   terraform:
-    name: Provision EC2 with Terraform
+    name: Run Terraform
     runs-on: ubuntu-latest
+
+    environment: ${{ inputs.terraform_action == 'apply' && 'apply-review' || 'destroy-review' }}
 
     env:
       AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
@@ -60,4 +70,9 @@ jobs:
         run: terraform plan -input=false
 
       - name: Terraform Apply
+        if: ${{ inputs.terraform_action == 'apply' }}
         run: terraform apply -auto-approve -input=false
+
+      - name: Terraform Destroy
+        if: ${{ inputs.terraform_action == 'destroy' }}
+        run: terraform destroy -auto-approve -input=false
