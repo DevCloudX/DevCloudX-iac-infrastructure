@@ -86,6 +86,20 @@ jobs:
           name: terraform-state
           path: terraform.tfstate
 
+      - name: Upload PEM File as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ec2-pem-file
+          path: my-ec2-key.pem
+  
+      - name: Output Public IP
+        run: |
+          echo "Public IP: $(terraform output public_ip)"
+  
+      - name: Output Private Key Path
+        run: |
+          echo "Private Key Path: $(terraform output private_key_path)"
+
   destroy:
     name: Terraform Destroy
     needs: apply
