@@ -31,22 +31,18 @@ on:
         required: true
         type: string
 
+env:
+  TF_VAR_aws_region: ${{ inputs.aws_region }}
+  TF_VAR_ami_id: ${{ inputs.ami_id }}
+  TF_VAR_instance_type: ${{ inputs.instance_type }}
+  TF_VAR_instance_name: ${{ inputs.instance_name }}
+  AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+  AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+
 jobs:
   plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
-
-    outputs:
-      run_id: ${{ github.run_id }}
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
-      AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
-      TF_VAR_aws_region: ${{ inputs.aws_region }}
-      TF_VAR_ami_id: ${{ inputs.ami_id }}
-      TF_VAR_instance_type: ${{ inputs.instance_type }}
-      TF_VAR_instance_name: ${{ inputs.instance_name }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -64,18 +60,11 @@ jobs:
 
   apply:
     name: Terraform Apply
-    runs-on: ubuntu-latest
     needs: plan
-    environment: apply-review  # requires manual approval
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
-      AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
-      TF_VAR_aws_region: ${{ inputs.aws_region }}
-      TF_VAR_ami_id: ${{ inputs.ami_id }}
-      TF_VAR_instance_type: ${{ inputs.instance_type }}
-      TF_VAR_instance_name: ${{ inputs.instance_name }}
-
+    runs-on: ubuntu-latest
+    environment:
+      name: apply-review
+      url: https://console.aws.amazon.com/ec2/
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -91,20 +80,19 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false
 
+      - name: Save Terraform State
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-state
+          path: terraform.tfstate
+
   destroy:
     name: Terraform Destroy
-    runs-on: ubuntu-latest
     needs: apply
-    environment: destroy-review  # requires manual approval
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
-      AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
-      TF_VAR_aws_region: ${{ inputs.aws_region }}
-      TF_VAR_ami_id: ${{ inputs.ami_id }}
-      TF_VAR_instance_type: ${{ inputs.instance_type }}
-      TF_VAR_instance_name: ${{ inputs.instance_name }}
-
+    runs-on: ubuntu-latest
+    environment:
+      name: destroy-review
+      url: https://console.aws.amazon.com/ec2/
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -113,6 +101,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.5.0
+
+      - name: Download Terraform State
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-state
 
       - name: Terraform Init
         run: terraform init
