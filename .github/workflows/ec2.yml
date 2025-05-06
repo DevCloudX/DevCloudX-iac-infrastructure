@@ -6,25 +6,46 @@ on:
       aws_access_key_id:
         description: "AWS Access Key ID"
         required: true
+        type: string
       aws_secret_access_key:
         description: "AWS Secret Access Key"
         required: true
-      instance_name:
-        description: "EC2 Instance Name"
+        type: string
+      aws_region:
+        description: "AWS Region"
         required: true
+        default: "us-east-1"
+        type: string
+      ami_id:
+        description: "AMI ID"
+        required: true
+        default: "ami-0c02fb55956c7d316"
+        type: string
+      instance_type:
+        description: "EC2 Instance Type"
+        required: true
+        default: "t2.micro"
+        type: string
+      instance_name:
+        description: "Name Tag for EC2"
+        required: true
+        type: string
 
 jobs:
   terraform:
+    name: Provision EC2 with Terraform
     runs-on: ubuntu-latest
 
     env:
       AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
       AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+      TF_VAR_aws_region: ${{ inputs.aws_region }}
+      TF_VAR_ami_id: ${{ inputs.ami_id }}
+      TF_VAR_instance_type: ${{ inputs.instance_type }}
       TF_VAR_instance_name: ${{ inputs.instance_name }}
-      TF_VAR_aws_region: "us-east-1"
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Setup Terraform
