@@ -10,7 +10,7 @@ on:
         description: "AWS Secret Access Key"
         required: true
       KEY_NAME:
-        description: "Key pair name"
+        description: "EC2 Key Pair Name"
         required: true
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Set up Terraform
@@ -35,20 +35,19 @@ jobs:
             -var="aws_secret_key=${{ github.event.inputs.AWS_SECRET_ACCESS_KEY }}" \
             -var="key_name=${{ github.event.inputs.KEY_NAME }}"
         working-directory: aws-keypair
-      
-      - name: Save private key
-        run: |
-          terraform output -raw private_key_pem > private_key.pem
+
+      - name: Save private key to PEM file
+        run: terraform output -raw private_key_pem > private_key.pem
         working-directory: aws-keypair
 
       - name: Install Putty Tools
         run: sudo apt-get update && sudo apt-get install -y putty-tools
 
       - name: Convert PEM to PPK
-        run: puttygen private_key.pem -o private_key.ppk
+        run: puttygen aws-keypair/private_key.pem -o private_key.ppk
 
       - name: Upload PPK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: ec2-keypair-${{ github.run_id }}
           path: private_key.ppk
