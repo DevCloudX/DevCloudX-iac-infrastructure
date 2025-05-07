@@ -48,7 +48,7 @@ jobs:
         run: puttygen private_key.pem -o private_key.ppk
 
       - name: Upload PPK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ec2-keypair-${{ github.run_id }}
           path: private_key.ppk
