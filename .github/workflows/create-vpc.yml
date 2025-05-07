@@ -1,0 +1,50 @@
+name: Create AWS VPC
+
+on:
+  workflow_dispatch:
+    inputs:
+      AWS_ACCESS_KEY_ID:
+        description: "AWS Access Key ID"
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        description: "AWS Secret Access Key"
+        required: true
+      VPC_NAME:
+        description: "VPC Name"
+        required: true
+      VPC_CIDR:
+        description: "VPC CIDR (e.g., 10.0.0.0/16)"
+        required: true
+      AWS_REGION:
+        description: "AWS Region (default: us-east-1)"
+        default: "us-east-1"
+        required: false
+
+jobs:
+  create-vpc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: aws-vpc
+
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+            -var="aws_access_key=${{ github.event.inputs.AWS_ACCESS_KEY_ID }}" \
+            -var="aws_secret_key=${{ github.event.inputs.AWS_SECRET_ACCESS_KEY }}" \
+            -var="vpc_name=${{ github.event.inputs.VPC_NAME }}" \
+            -var="vpc_cidr=${{ github.event.inputs.VPC_CIDR }}" \
+            -var="aws_region=${{ github.event.inputs.AWS_REGION }}"
+        working-directory: aws-vpc
+
+      - name: Output VPC ID
+        run: terraform output vpc_id
+        working-directory: aws-vpc
