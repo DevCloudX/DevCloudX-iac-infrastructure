@@ -1,4 +1,4 @@
-name: Terraform EC2 Deployment
+name: create AWS EC2 
 
 on:
   workflow_dispatch:

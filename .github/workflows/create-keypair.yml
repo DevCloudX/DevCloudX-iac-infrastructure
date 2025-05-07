@@ -1,5 +1,4 @@
-name: Create AWS EC2 Key Pair using tearrform
-
+name: Create AWS EC2 Key Pair
 on:
   workflow_dispatch:
     inputs:
