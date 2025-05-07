@@ -17,8 +17,3 @@ variable "instance_name" {
   description = "Name tag for the EC2 instance"
   type        = string
 }
-
-variable "public_key_path" {
-  description = "Path to the public key for SSH access"
-  type        = string
-}
