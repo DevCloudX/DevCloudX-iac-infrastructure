@@ -28,6 +28,7 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: aws-security_group_(Firewall)
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
@@ -35,3 +36,4 @@ jobs:
           TF_VAR_aws_access_key: ${{ github.event.inputs.aws_access_key }}
           TF_VAR_aws_secret_key: ${{ github.event.inputs.aws_secret_key }}
           TF_VAR_security_group_name: ${{ github.event.inputs.security_group_name }}
+        working-directory: aws-security_group_(Firewall)
