@@ -55,11 +55,11 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ec2
+        working-directory: aws-ec2
 
       - name: Terraform Plan
         run: terraform plan -input=false
-        working-directory: ec2
+        working-directory: aws-ec2
 
   apply:
     name: Terraform Apply
@@ -80,11 +80,11 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ec2
+        working-directory: aws-ec2
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false
-        working-directory: ec2
+        working-directory: aws-ec2
 
       - name: Save Terraform State
         uses: actions/upload-artifact@v4
@@ -116,8 +116,8 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ec2
+        working-directory: aws-ec2
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -input=false
-        working-directory: ec2
+        working-directory: aws-ec2
