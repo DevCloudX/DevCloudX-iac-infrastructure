@@ -1,0 +1,58 @@
+name: Create Subnet
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_access_key:
+        description: "AWS Access Key ID"
+        required: true
+        type: string
+      aws_secret_key:
+        description: "AWS Secret Access Key"
+        required: true
+        type: string
+      subnet_name:
+        description: "Subnet Name"
+        required: true
+        type: string
+      vpc_id:
+        description: "VPC ID"
+        required: true
+        type: string
+      cidr_block:
+        description: "CIDR Block (e.g. 10.0.1.0/24)"
+        required: true
+        type: string
+      availability_zone:
+        description: "Availability Zone (e.g. us-east-1a)"
+        required: true
+        type: string
+
+jobs:
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: aws-subnet
+
+      - name: Terraform Apply
+        env:
+          TF_VAR_aws_access_key: ${{ github.event.inputs.aws_access_key }}
+          TF_VAR_aws_secret_key: ${{ github.event.inputs.aws_secret_key }}
+          TF_VAR_subnet_name: ${{ github.event.inputs.subnet_name }}
+          TF_VAR_vpc_id: ${{ github.event.inputs.vpc_id }}
+          TF_VAR_cidr_block: ${{ github.event.inputs.cidr_block }}
+          TF_VAR_availability_zone: ${{ github.event.inputs.availability_zone }}
+        run: terraform apply -auto-approve
+        working-directory: aws-subnet
