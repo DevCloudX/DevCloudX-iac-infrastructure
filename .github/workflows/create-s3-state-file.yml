@@ -1,37 +1,39 @@
 name: Create S3 State File Bucket
+
 on:
   workflow_dispatch:
     inputs:
-      AWS_ACCESS_KEY_ID:
-        description: "AWS Access Key ID"
+      aws_access_key_id:
+        description: 'AWS Access Key ID'
         required: true
-      AWS_SECRET_ACCESS_KEY:
-        description: "AWS Secret Access Key"
+        type: string
+      aws_secret_access_key:
+        description: 'AWS Secret Access Key'
         required: true
-      S3_BUCKET_NAME:
-        description: "S3 Bucket Name"
+        type: string
+      se_bucket_name:
+        description: 'S3 bucket name'
         default: "devcloudx-tf-aws-s3-bucket"
         required: true
+        type: string
 
 jobs:
   create_s3_bucket:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    env:
+      AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+      AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
 
-      - name: Set up Terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         run: terraform init
-        working-directory: aws-s3-statefile-store
 
       - name: Terraform Apply
-        run: |
-          terraform apply -auto-approve \
-            -var="aws_access_key=${{ github.event.inputs.AWS_ACCESS_KEY_ID }}" \
-            -var="aws_secret_key=${{ github.event.inputs.AWS_SECRET_ACCESS_KEY }}" \
-            -var="se_bucket_name=${{ github.event.inputs.S3_BUCKET_NAME }}"
-        working-directory: aws-s3-statefile-store
+        run: terraform apply -auto-approve -var="se_bucket_name=${{ inputs.se_bucket_name }}"
