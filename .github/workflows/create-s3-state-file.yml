@@ -15,15 +15,17 @@ on:
         description: 'S3 bucket name'
         default: "devcloudx-tf-aws-s3-bucket"
         required: true
-        type: string
+       type: string
 
-jobs:
-  create_s3_bucket:
-    runs-on: ubuntu-latest
 
     env:
       AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
       AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+      se_bucket_name: ${{ inputs.se_bucket_name }}"
+
+jobs:
+  create_s3_bucket:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -34,6 +36,8 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: aws-s3-statefile-store
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -var="se_bucket_name=${{ inputs.se_bucket_name }}"
+        working-directory: aws-s3-statefile-store
