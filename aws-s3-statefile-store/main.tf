@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "tf_state" {
-  bucket = "devcloudx-tf-aws-s3-bucket"  # Must be globally unique
+  bucket = var.se_bucket_name
   force_destroy = true
 
   tags = {
