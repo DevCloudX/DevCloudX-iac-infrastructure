@@ -1,52 +1,41 @@
-name: Create AWS EC2 Key Pair
+name: Create S3 Bucket
+
 on:
   workflow_dispatch:
     inputs:
-      AWS_ACCESS_KEY_ID:
-        description: "AWS Access Key ID"
+      aws_access_key_id:
+        description: 'AWS Access Key ID'
         required: true
-      AWS_SECRET_ACCESS_KEY:
-        description: "AWS Secret Access Key"
+        type: string
+      aws_secret_access_key:
+        description: 'AWS Secret Access Key'
         required: true
-      KEY_NAME:
-        description: "EC2 Key Pair Name"
+        type: string
+      se_bucket_name:
+        description: 'S3 bucket name'
+        default: "devcloudx-tf-aws-s3-bucket-DEV"
         required: true
+        type: string  # <-- fixed indentation and typo
 
 jobs:
-  create-key:
+  create_s3_bucket:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    env:  # ✅ moved to correct location
+      AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+      AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
 
-      - name: Set up Terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         run: terraform init
-        working-directory: aws-keypair
+        working-directory: aws-s3
 
       - name: Terraform Apply
-        run: |
-          terraform apply -auto-approve \
-            -var="aws_access_key=${{ github.event.inputs.AWS_ACCESS_KEY_ID }}" \
-            -var="aws_secret_key=${{ github.event.inputs.AWS_SECRET_ACCESS_KEY }}" \
-            -var="key_name=${{ github.event.inputs.KEY_NAME }}"
-        working-directory: aws-keypair
-
-      - name: Save private key to PEM file
-        run: terraform output -raw private_key_pem > private_key.pem
-        working-directory: aws-keypair
-
-      - name: Install Putty Tools
-        run: sudo apt-get update && sudo apt-get install -y putty-tools
-
-      - name: Convert PEM to PPK
-        run: puttygen aws-keypair/private_key.pem -o private_key.ppk
-
-      - name: Upload PPK Artifact
-        uses: actions/upload-artifact@v4 #version updated
-        with:
-          name: ec2-keypair-${{ github.run_id }}
-          path: private_key.ppk
+        run: terraform apply -auto-approve -var="se_bucket_name=${{ inputs.se_bucket_name }}"
+        working-directory: aws-s3
