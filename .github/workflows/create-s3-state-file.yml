@@ -15,17 +15,15 @@ on:
         description: 'S3 bucket name'
         default: "devcloudx-tf-aws-s3-bucket"
         required: true
-       type: string
-
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
-      AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
-      se_bucket_name: ${{ inputs.se_bucket_name }}"
+        type: string  # <-- fixed indentation and typo
 
 jobs:
   create_s3_bucket:
     runs-on: ubuntu-latest
+
+    env:  # ✅ moved to correct location
+      AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+      AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
 
     steps:
       - name: Checkout
